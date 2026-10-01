@@ -1,0 +1,7 @@
+Este é outro ficheiro de demonstração do VidSave.
+
+Também não é um vídeo real. Existe um segundo item de demonstração
+precisamente para os testes conseguirem provar que chamadas
+concorrentes a itens diferentes nunca misturam dados.
+
+Item: video-2

@@ -1,0 +1,16 @@
+# Dependências
+node_modules/
+
+# Ficheiros temporários de downloads (Etapa 6)
+backend/tmp/
+
+# Variáveis de ambiente reais (nunca commitar)
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+
+# SO / editor
+.DS_Store
+.vscode/

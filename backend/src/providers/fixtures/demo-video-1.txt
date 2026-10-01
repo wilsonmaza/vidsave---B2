@@ -1,0 +1,7 @@
+Este é um ficheiro de demonstração do VidSave.
+
+Não é um vídeo real. Serve apenas para provar que o pipeline
+resolve -> formatos -> download stream funciona de ponta a ponta,
+sem depender de nenhuma plataforma externa.
+
+Item: video-1
