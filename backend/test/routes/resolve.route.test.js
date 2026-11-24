@@ -5,9 +5,20 @@ import { ProviderRegistry } from '../../src/providers/registry.js';
 import { ProviderError } from '../../src/providers/provider.interface.js';
 import { MemoryRateLimiter } from '../../src/security/rate-limiter.js';
 import { createProviderRegistry } from '../../src/providers/bootstrap.js';
+import { createLookupWithOverrides } from '../../src/security/ssrf-guard.js';
+
+// DNS falso para os hosts fictícios usados nestes testes: sem isto, o SSRF
+// Guard tentava DNS real e os testes falhavam (400) em qualquer máquina
+// sem internet. Hosts não listados aqui (ex.: localhost, IPs privados)
+// continuam a ir para o DNS real, por isso os testes de bloqueio SSRF
+// mantêm o comportamento verdadeiro.
+const TEST_LOOKUP = createLookupWithOverrides({
+  'sample.test': [{ address: '93.184.216.34', family: 4 }],
+  'qualquer.exemplo.com': [{ address: '93.184.216.34', family: 4 }],
+});
 
 async function startTestServer(appOptions) {
-  const app = createApp(appOptions);
+  const app = createApp({ lookup: TEST_LOOKUP, ...appOptions });
   const server = app.listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   const { port } = server.address();

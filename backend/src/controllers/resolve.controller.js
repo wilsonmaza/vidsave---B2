@@ -20,12 +20,14 @@ function safeHostnameForLog(rawUrl) {
  * os testes possam usar instâncias de teste sem tocar em configuração
  * real.
  */
-export function createResolveController({ registry, downloadStore, isHostAllowed }) {
+export function createResolveController({ registry, downloadStore, isHostAllowed, lookup }) {
   return async function resolveController(req, res, next) {
     const host = safeHostnameForLog(req.body?.url);
 
     try {
-      const media = await resolveUrl(req.body, { registry, downloadStore, isHostAllowed });
+      // `lookup` só é passado pelos testes (DNS falso, sem rede real). Em
+      // produção fica undefined e resolveUrl() usa o DNS real.
+      const media = await resolveUrl(req.body, { registry, downloadStore, isHostAllowed, lookup });
       console.log('[resolve]', { ip: req.clientIp, host, outcome: 'success' });
       res.status(200).json({ success: true, data: media });
     } catch (err) {

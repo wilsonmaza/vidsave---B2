@@ -8,10 +8,20 @@ import { isAllowedHost } from './config/allowlist.js';
 // resolve.service.js fica realmente ligada. O archive-org-provider já
 // usa a allowlist real por omissão de qualquer forma (ver bootstrap.js);
 // isto acrescenta a rejeição ANTES de sequer resolver o provider.
-const app = createApp({ isHostAllowed });
+const app = createApp({ isHostAllowed: isAllowedHost });
+
+// Em produção, CORS aberto a qualquer origem deixa qualquer site usar o
+// backend como API sua. Não bloqueamos o arranque (um deploy de teste
+// pode precisar disto), mas o aviso fica bem visível nos logs.
+if (env.nodeEnv === 'production' && env.corsOrigin === '*') {
+  console.warn(
+    '[config] AVISO: CORS_ORIGIN não está definido (ou é "*") em produção. ' +
+      'Define-o com o domínio do frontend, ex.: https://vidsave-bay.vercel.app'
+  );
+}
 
 const server = app.listen(env.port, () => {
-  console.log(`VidSave backend a correr em http://localhost:${env.port} (${env.nodeEnv})`);
+  console.log(`VidSave backend a ouvir na porta ${env.port} (${env.nodeEnv})`);
 });
 
 // Etapa 6.4 — Inicia limpeza de órfãos

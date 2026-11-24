@@ -18,13 +18,37 @@ function toPositiveInt(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+/**
+ * Interpreta CORS_ORIGIN:
+ *  - vazio, só espaços/vírgulas, ou contém '*'  -> '*' (qualquer origem; dev)
+ *  - uma origem                                  -> string
+ *  - várias, separadas por vírgula               -> array
+ * Remove a barra final, porque o browser envia a origem SEM barra e o
+ * cors() compara texto exato — "https://x.vercel.app/" nunca coincidiria.
+ *
+ * @param {string|undefined} value
+ * @returns {string|string[]}
+ */
+export function parseCorsOrigin(value) {
+  if (typeof value !== 'string') return '*';
+
+  const origins = value
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter((origin) => origin !== '');
+
+  if (origins.length === 0 || origins.includes('*')) return '*';
+  return origins.length === 1 ? origins[0] : origins;
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: toInt(process.env.PORT, 3000),
-  // TEMP: '*' facilita o dev local com o frontend aberto via file:// ou
-  // servido noutra porta. Isto tem de ficar restrito a uma origem concreta
-  // na etapa de segurança (Etapa 2/3) antes de qualquer deploy.
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  // '*' só serve para dev local (frontend aberto via file:// ou noutra
+  // porta). Em produção, define CORS_ORIGIN com o domínio do frontend
+  // (uma origem, ou várias separadas por vírgula) — server.js avisa nos
+  // logs se ficar em '*'.
+  corsOrigin: parseCorsOrigin(process.env.CORS_ORIGIN),
 
   // Etapa 3 — rate limiting e controlo de abuso.
   // Só true quando existir exatamente um proxy confiável à frente da app

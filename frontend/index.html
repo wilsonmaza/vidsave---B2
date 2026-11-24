@@ -3,20 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070B16" />
+  <meta name="description" content="Cola o link de um vídeo do Internet Archive e descarrega-o. Sem conta, sem instalar nada." />
   <title>VidSave</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232B59FF'/%3E%3Cpath d='M16 7v12m0 0l-5-5m5 5l5-5M9 24h14' stroke='%23fff' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="card">
-    <h1>VidSave</h1>
-    <p class="tagline">Fundação do projeto — Etapa 1</p>
+  <div class="wrap">
+    <header class="top">
+      <span class="wordmark">VidSave</span>
+    </header>
 
-    <div class="status" id="status" role="status">
-      <span class="dot" id="statusDot"></span>
-      <span id="statusText">A verificar backend…</span>
-    </div>
-  </main>
+    <main id="app" data-state="idle">
+      <h1 class="headline">
+        <span>Cola o link.</span>
+        <span>Leva o vídeo.</span>
+      </h1>
+      <p class="lead">
+        Por agora só aceita links do Internet Archive (archive.org). Sem conta e sem instalar nada.
+      </p>
 
+      <form id="form" class="slot" novalidate>
+        <label class="sr-only" for="url">Link do vídeo</label>
+        <input
+          id="url"
+          name="url"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="https://archive.org/details/…"
+          required
+        />
+        <button id="submit" type="submit">Verificar link</button>
+        <span class="channel" aria-hidden="true"></span>
+      </form>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="errorPanel" class="panel error" hidden>
+        <p id="errorText" class="error-text"></p>
+        <button id="retry" type="button" class="ghost" hidden>Tentar de novo</button>
+      </section>
+
+      <section id="resultPanel" class="panel result" hidden>
+        <h2 id="mediaTitle" class="media-title"></h2>
+        <p id="mediaMeta" class="media-meta"></p>
+
+        <div id="downloadError" class="download-error" role="alert" hidden>
+          <p id="downloadErrorText"></p>
+          <button id="recheck" type="button" class="ghost" hidden>Verificar o link outra vez</button>
+        </div>
+
+        <ul id="formats" class="formats"></ul>
+        <p id="bigFileNote" class="note" hidden>
+          Ficheiro grande: o browser guarda-o diretamente e o nome pode ficar sem extensão. Se for preciso, acrescenta-a ao nome do ficheiro.
+        </p>
+      </section>
+    </main>
+
+    <aside id="adSlot" class="ad" aria-label="Publicidade" hidden>
+      <span class="ad-label">Publicidade</span>
+      <div class="ad-box"></div>
+    </aside>
+
+    <footer class="foot">
+      <p id="health" class="health" data-health="unknown">
+        <span class="health-dot" aria-hidden="true"></span>
+        <span id="healthText">A verificar o servidor…</span>
+      </p>
+      <p class="legal">Usa o VidSave só para conteúdos que tens o direito de descarregar.</p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

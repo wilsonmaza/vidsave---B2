@@ -9,9 +9,18 @@ import { createArchiveOrgProvider } from '../../src/providers/archive-org-provid
 import { ProviderRegistry } from '../../src/providers/registry.js';
 import { createLocalStorage } from '../../src/storage/local-storage.js';
 import { isAllowedHost } from '../../src/config/allowlist.js';
+import { createLookupWithOverrides } from '../../src/security/ssrf-guard.js';
+
+// DNS falso para archive.org: estes testes usam um fetch falso, por isso
+// nunca deviam precisar de internet — sem isto, o SSRF Guard fazia DNS
+// real e falhava (400) offline.
+const TEST_LOOKUP = createLookupWithOverrides({
+  'sample.test': [{ address: '93.184.216.34', family: 4 }],
+  'archive.org': [{ address: '207.241.224.2', family: 4 }],
+});
 
 async function startTestServer(appOptions) {
-  const app = createApp(appOptions);
+  const app = createApp({ lookup: TEST_LOOKUP, ...appOptions });
   const server = app.listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   const { port } = server.address();

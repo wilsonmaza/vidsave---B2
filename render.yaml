@@ -1,0 +1,28 @@
+# Blueprint da Render para o backend do VidSave.
+# Render -> New -> Blueprint -> escolher este repositório.
+#
+# O frontend NÃO vai aqui: fica na Vercel (ver vercel.json e README).
+services:
+  - type: web
+    name: vidsave-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # A Render põe exatamente um proxy à frente da app. Sem isto, o rate
+      # limit trata todos os utilizadores como um só (mesmo IP).
+      - key: TRUST_PROXY
+        value: "true"
+      # Preencher no painel da Render com o domínio do frontend na Vercel,
+      # SEM barra no fim. Ex.: https://vidsave-bay.vercel.app
+      - key: CORS_ORIGIN
+        sync: false
+      # O provider de demonstração (sample.test) é só para desenvolvimento.
+      - key: DEMO_PROVIDER_ENABLED
+        value: "false"

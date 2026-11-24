@@ -43,6 +43,10 @@ export function createApp({
   // allowlist REAL por omissão, independentemente disto — este
   // parâmetro é só a camada de rejeição antecipada, não a única defesa.
   isHostAllowed,
+  // Função de DNS usada pelo SSRF Guard em /api/resolve. Só os testes a
+  // passam (para não dependerem de DNS real); em produção fica undefined
+  // e é usado o DNS real.
+  lookup,
   resolveRateLimiter = new MemoryRateLimiter({
     windowMs: env.rateLimit.windowMs,
     maxRequests: env.resolveRateLimitMax,
@@ -98,7 +102,7 @@ export function createApp({
 
   app.use('/api', healthRouter);
 
-  const resolveController = createResolveController({ registry, downloadStore, isHostAllowed });
+  const resolveController = createResolveController({ registry, downloadStore, isHostAllowed, lookup });
   const resolveRouter = createResolveRouter({
     controller: resolveController,
     rateLimitMiddleware: createRateLimitMiddleware(resolveRateLimiter),

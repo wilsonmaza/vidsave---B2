@@ -1,17 +1,50 @@
 # VidSave
 
-**Etapa 1** (fundação) + **Etapa 2** (segurança de rede) + **Etapa 3**
-(rate limiting + controlo de abuso) + **Etapa 4** (providers + demo
-provider) + **Etapa 5** (`POST /api/resolve`) + **Etapa 5.1**
-(hardening/auditoria da integração).
+App web para descarregar vídeos a partir de um link, sem conta. O backend
+(Node + Express) resolve o link e serve o ficheiro; o frontend
+(HTML/CSS/JS puro) fica numa pasta separada e não tem build.
 
-Ainda não há `/api/download/:downloadId`, storage, ficheiros temporários,
-Archive.org, providers externos, anúncios reais, autenticação nem deploy
-— isso vem nas próximas etapas.
+**Estado atual:** `POST /api/resolve`, `GET /api/download/:downloadId`
+(uso único, com Size Guard e limpeza de ficheiros temporários), provider
+real do Internet Archive e provider de demonstração (só dev). O único
+provider real é o Internet Archive (`archive.org`) — o site diz isso
+mesmo no ecrã, e só deve passar a anunciar outras plataformas quando o
+provider respetivo existir. Ainda não há anúncios reais nem autenticação.
 
 ## Requisitos
 
 - Node.js 18 ou superior
+
+## Publicar online (Vercel + Render)
+
+São duas peças separadas: o **frontend** na Vercel e o **backend** na
+Render. O aviso "Servidor inacessível" aparece quando o frontend não
+consegue falar com o backend, por isso o backend tem de estar online
+primeiro.
+
+1. **Backend na Render.** Render → New → Blueprint → escolher este
+   repositório (usa o `render.yaml`). No serviço `vidsave-api`, em
+   Environment, define `CORS_ORIGIN` com o domínio do frontend, **sem barra
+   no fim** (ex.: `https://vidsave-bay.vercel.app`). Quando o deploy
+   terminar, abre `https://<nome>.onrender.com/api/health` — tem de
+   devolver `{"status":"ok", ...}`.
+2. **Frontend na Vercel.** Em `frontend/config.js`, põe
+   `API_BASE_URL: 'https://<nome>.onrender.com'` (HTTPS, sem barra no
+   fim). Faz commit e push: a Vercel publica sozinha, porque o
+   `vercel.json` já aponta para a pasta `frontend`.
+3. **Confirmar.** Abre o site: o rodapé tem de dizer "Servidor ligado".
+
+Notas:
+
+- O plano gratuito da Render adormece o backend depois de cerca de 15
+  minutos sem uso; o primeiro pedido depois disso pode demorar até um
+  minuto. O site avisa o utilizador e volta a tentar sozinho.
+- O disco do plano gratuito é temporário. Serve, porque os ficheiros do
+  VidSave também são temporários (apagados após o download ou ao expirar).
+- `DEMO_PROVIDER_ENABLED=false` em produção (já no `render.yaml`).
+- Se o site mostrar "Não foi possível ligar ao servidor" com o backend
+  online, o mais provável é `CORS_ORIGIN` errado (tem de ser exatamente o
+  domínio do frontend).
 
 ## Como executar o backend
 
@@ -619,8 +652,7 @@ vidsave/
 
 ### Limitações conhecidas da Etapa 1
 
-- `CORS_ORIGIN` está permissivo (`*`) de propósito, para simplificar o dev
-  local. Tem de ser restringido a uma origem concreta antes de qualquer
-  deploy.
-- `API_BASE_URL` está fixo no `frontend/app.js`. Ainda não há necessidade
-  de o tornar configurável nesta fase.
+- `CORS_ORIGIN` fica em `*` quando não está definido (dev local). Em
+  produção tem de ser o domínio do frontend (uma origem, ou várias
+  separadas por vírgula); o servidor avisa nos logs se ficar em `*`.
+- `API_BASE_URL` é configurável em `frontend/config.js`.
